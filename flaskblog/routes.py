@@ -1,7 +1,7 @@
 from flask import render_template,url_for, redirect, flash
 from flaskblog.forms import RegistrationForm, LoginForm
-from flaskblog import app
-
+from flaskblog import app, db, bcrypt
+from flaskblog.models import User, Post
 blog_posts = [
     {
        'author':  'Utsav Jaiswal',
@@ -32,8 +32,16 @@ def about():
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
-        flash(f'Account created for {form.username.data}!', category='success')
-        return redirect(url_for('home'))
+        hashed_pw = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+        user = User(username = form.username.data,
+                    password = hashed_pw,
+                    email = form.email.data,
+                    )
+        
+        db.session.add(user)
+        db.session.commit()
+        flash(f'Your acount has been created, login to continue!', category='success')
+        return redirect(url_for('login'))
     return render_template("register.html", title = 'Register',form = form)
 
 @app.route('/login', methods = ["GET", 'POST'])
