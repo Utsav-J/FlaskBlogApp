@@ -1,5 +1,5 @@
 from flask import render_template,url_for, redirect, flash, request
-from flaskblog.forms import RegistrationForm, LoginForm, UpdateForm
+from flaskblog.forms import RegistrationForm, LoginForm, UpdateForm, PostForm
 from flaskblog import app, db, bcrypt
 from flaskblog.models import User, Post
 from flask_login import login_user, current_user, logout_user, login_required
@@ -7,26 +7,27 @@ import secrets
 import os
 from PIL import Image
 
-blog_posts = [
-    {
-       'author':  'Utsav Jaiswal',
-       'title': 'My first blog',
-       'content': 'First post comment',
-       'date_posted': 'May 7th, 2024',
-    },
-    {
-       'author':  'Another Jaiswal',
-       'title': 'My second blog',
-       'content': 'Not the first post comment',
-       'date_posted': 'May 8th, 2024',
-    },
+# blog_posts = [
+#     {
+#        'author':  'Utsav Jaiswal',
+#        'title': 'My first blog',
+#        'content': 'First post comment',
+#        'date_posted': 'May 7th, 2024',
+#     },
+#     {
+#        'author':  'Another Jaiswal',
+#        'title': 'My second blog',
+#        'content': 'Not the first post comment',
+#        'date_posted': 'May 8th, 2024',
+#     },
 
-]
+# ]
 
 
 @app.route('/')
 @app.route('/home')
 def home():
+    blog_posts = Post.query.all()
     return render_template("homepage.html", posts = blog_posts, title = 'Flask App')
 
 @app.route('/about')
@@ -108,3 +109,16 @@ def account():
     return render_template("account.html",title = 'Account', 
                            image_file = image_file, 
                            form = form)
+
+
+@app.route('/post/new', methods = ["GET", "POST"])
+@login_required
+def new_post():
+    form  =  PostForm()
+    if form.validate_on_submit():
+        post = Post(title = form.title.data,content = form.content.data, author = current_user)
+        db.session.add(post)
+        db.session.commit()
+        flash('Your post has been created', 'success')
+        return redirect(url_for('home'))
+    return render_template("create_post.html", title = "New Post", form = form)
