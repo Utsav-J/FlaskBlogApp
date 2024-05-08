@@ -47,18 +47,22 @@
         </div>
     </nav>
 
-    <div >
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-            <div class="alert alert-{{ category }}" >
-                {{message}}
-            </div>
-            {% endfor %}
-        {% endif %}
-        {% endwith %}
-            {%block content%} {% endblock %}
-    </div>
+    <div class="container d-flex justify-content-center align-items-center vh-100">
+      <div>
+          {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+              {% for category, message in messages %}
+              <div class="alert alert-{{ category }}">
+                  {{message}}
+              </div>
+              {% endfor %}
+          {% endif %}
+          {% endwith %}
+          {% block content %} {% endblock %}
+      </div>
+  </div>
+  
+  
     
        
 
